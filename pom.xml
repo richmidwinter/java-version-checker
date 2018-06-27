@@ -5,7 +5,7 @@
 
 	<groupId>uk.co.wansdykehouse</groupId>
 	<artifactId>java-version-checker</artifactId>
-	<version>0.3</version>
+	<version>0.4-SNAPSHOT</version>
 	<url>https://github.com/richmidwinter/java-version-checker</url>
 	<description>Check for available Java version updates</description>
 
@@ -34,7 +34,7 @@
 		<url>https://github.com/richmidwinter/java-version-checker</url>
 		<connection>scm:git:git://github.com/richmidwinter/java-version-checker.git</connection>
 		<developerConnection>scm:git:git@github.com:richmidwinter/java-version-checker.git</developerConnection>
-	  <tag>java-version-checker-0.3</tag>
+	  <tag>HEAD</tag>
   </scm>
 
 	<dependencies>
