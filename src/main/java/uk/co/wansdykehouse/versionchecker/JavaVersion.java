@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -59,54 +60,58 @@ public class JavaVersion {
 		}
 	}
 	
-	private static int getInt(String version) {
-		return Integer.valueOf(version.replaceAll("[^\\d]", ""));
-	}
-	
 	/**
 	 * @param version The {@link String} representing the Java version.
 	 * @return True if a newer version is available, false otherwise.
 	 */
-	public static boolean checkVersion(String version) {
+	public static CheckResult check(String version) {
 		if (!version.matches("\\d+\\.\\d+\\.[_\\d]+")) {
-			log.severe("Unrecognised version format: "+ version);
-			return false;
+			return new CheckResult().add("Unrecognised version format: "+ version);
 		}
 		
 		String majorVersion = version.substring(0, version.lastIndexOf("."));
 		String minorVersion = version.substring(version.lastIndexOf(".") +1);
 		
-		return checkMajorVersion(version, majorVersion) && checkMinorVersion(version, majorVersion, minorVersion);
-	}
-	
-	private static boolean checkMajorVersion(String version, String majorComponent) {
-		boolean superseded = getInt(majorComponent) < getInt(maxMajorVersion);
+		CheckResult result = new CheckResult();
+		checkMajorVersion(result, version, majorVersion);
 		
-		if (superseded) {
-			log.info(version +" is behind latest major release " +maxMajorVersion);
+		if (!result.isUpgradeAvailable()) {
+			checkMinorVersion(result, version, majorVersion, minorVersion);
 		}
 		
-		return superseded;
+		return result;
 	}
 	
-	private static boolean checkMinorVersion(String version, String majorComponent, String minorComponent) {
+	private static int getInt(String version) {
+		return Integer.valueOf(version.replaceAll("[^\\d]", ""));
+	}
+	
+	private static void checkMajorVersion(CheckResult result, String version, String majorComponent) {
+		if (getInt(majorComponent) < getInt(maxMajorVersion)) {
+			result.setUpgradeAvailable();
+			
+			result.add(version +" is behind latest major release " +maxMajorVersion);
+		}
+	}
+	
+	private static void checkMinorVersion(CheckResult result, String version, String majorComponent, String minorComponent) {
 		if (versions.containsKey(majorComponent)) {
 			String latestMinorVersion = versions.get(majorComponent);
 			if (getInt(minorComponent) < getInt(latestMinorVersion)) {
-				log.info(String.format("%s is superseded by %s.%s", version, majorComponent, latestMinorVersion));
-				
-				return true;
+				result.setUpgradeAvailable();
+				result.add(String.format("%s is superseded by %s.%s", version, majorComponent, latestMinorVersion));
 			} else {
-				log.info(version +" is the latest available version.");
-				return false;
+				result.add(version +" is the latest available version.");
 			}
-		} else {
-			return false;
 		}
 	}
 	
 	public static void main(String[] args) {
-		JavaVersion.checkVersion(
-				System.getProperty("java.version"));
+		List<String> messages = JavaVersion.check(System.getProperty("java.version"))
+				.getMessages();
+		
+		for (String message : messages) {
+			System.out.println(message);
+		}
 	}
 }
