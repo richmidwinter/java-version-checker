@@ -7,7 +7,7 @@ public class CheckResult {
 
 	private boolean isUpgradeAvailable;
 	
-	private List<String> messages = new ArrayList<>();
+	private List<String> messages = new ArrayList<String>();
 	
 	protected CheckResult() {
 	}
